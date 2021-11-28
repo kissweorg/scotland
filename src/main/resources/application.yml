@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: scotland
+
+---
+server:
+  port: 8090
+spring:
+  config:
+    activate:
+      on-profile: dev
+  webflux:
+    base-path: /api
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      username: scotland_dev_admin
+      password: Admin123Admin123
+      database: scotland_dev
+      authentication-database: admin
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/scotland_dev
+    username: scotland_dev_admin
+    password: Admin123Admin123
+    pool:
+#      validation-query: SELECT
+      enabled: true
+
+auth:
+  header:
+    user-id: X-Kisswe-User-Id
+
+logging:
+  level:
+    org:
+      springframework:
+        data:
+          r2dbc: DEBUG
