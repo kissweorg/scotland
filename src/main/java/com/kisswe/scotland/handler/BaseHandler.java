@@ -12,7 +12,7 @@ import java.util.Optional;
 public abstract class BaseHandler {
     private final AuthHeaderConfig authHeaderConfig;
 
-    protected String getUserIdFromRequest(ServerRequest request) {
+    protected String parseUserIdFromRequest(ServerRequest request) {
         return Optional.ofNullable(request.headers().firstHeader(authHeaderConfig.getUserId()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
     }

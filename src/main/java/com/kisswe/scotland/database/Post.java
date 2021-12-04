@@ -14,11 +14,14 @@ import java.time.LocalDateTime;
 @Data
 @Table("posts")
 public class Post {
+    private static final int SUMMARY_CHAR_LENGTH = 128;
     @Id
     private Long id;
     private String userId;
+    private String topic;
     private String content;
     private String imageUrl;
+    private String thumbnailUrl;
     private Boolean resolved;
     @CreatedDate
     private LocalDateTime createdAt;
@@ -26,4 +29,10 @@ public class Post {
     private LocalDateTime updatedAt;
     @Version
     private Long version;
+
+    public String getSummarizedContent() {
+        if (content.length() < SUMMARY_CHAR_LENGTH)
+            return content;
+        return content.substring(0, SUMMARY_CHAR_LENGTH) + "...";
+    }
 }

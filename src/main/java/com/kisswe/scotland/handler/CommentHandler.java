@@ -28,7 +28,7 @@ public class CommentHandler extends BaseHandler {
 
     public Mono<ServerResponse> createComment(ServerRequest request) {
         Long postId = Long.parseLong(request.pathVariable("postId"));
-        String userId = getUserIdFromRequest(request);
+        String userId = parseUserIdFromRequest(request);
 
         return request
                 .bodyToMono(CreateCommentRequest.class)

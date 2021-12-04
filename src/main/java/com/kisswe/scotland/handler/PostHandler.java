@@ -10,6 +10,7 @@ import com.kisswe.scotland.service.domain.CreatePostDto;
 import com.kisswe.scotland.service.domain.UpdatePostDto;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -40,26 +41,25 @@ public class PostHandler extends BaseHandler {
 
     public Mono<ServerResponse> getMyPosts(ServerRequest request) {
         Flux<IndexPostResponse> indexPostResponseFlux = postService
-                .getPosts()
+                .getPostsForUser(parseUserIdFromRequest(request))
                 .map(IndexPostResponse::from);
         return ServerResponse.ok().body(indexPostResponseFlux, IndexPostResponse.class);
     }
 
     public Mono<ServerResponse> getAllPosts(ServerRequest request) {
         Flux<IndexPostResponse> indexPostResponseFlux = postService
-                .getPostsForUser(getUserIdFromRequest(request))
+                .getPosts()
                 .map(IndexPostResponse::from);
         return ServerResponse.ok().body(indexPostResponseFlux, IndexPostResponse.class);
     }
 
     public Mono<ServerResponse> createPost(ServerRequest request) {
-        String userId = getUserIdFromRequest(request);
-
         return request
                 .bodyToMono(CreatePostRequest.class)
                 .map(createPostRequest ->
                         CreatePostDto.builder()
-                                .userId(userId)
+                                .userId(parseUserIdFromRequest(request))
+                                .topic(createPostRequest.getTopic())
                                 .content(createPostRequest.getContent())
                                 .imageUrl(createPostRequest.getImageUrl())
                                 .build())
@@ -70,14 +70,12 @@ public class PostHandler extends BaseHandler {
     }
 
     public Mono<ServerResponse> updatePost(ServerRequest request) {
-        Long postId = Long.parseLong(request.pathVariable("postId"));
-        String userId = getUserIdFromRequest(request);
         return request
                 .bodyToMono(UpdatePostRequest.class)
                 .map(updatePostRequest ->
                         UpdatePostDto.builder()
-                                .postId(postId)
-                                .userId(userId)
+                                .postId(parsePostId(request))
+                                .userId(parseUserIdFromRequest(request))
                                 .content(updatePostRequest.getContent())
                                 .imageUrl(updatePostRequest.getImageUrl())
                                 .build())
@@ -87,7 +85,7 @@ public class PostHandler extends BaseHandler {
 
     public Mono<ServerResponse> deletePost(ServerRequest request) {
         Long postId = Long.parseLong(request.pathVariable("postId"));
-        String userId = getUserIdFromRequest(request);
+        String userId = parseUserIdFromRequest(request);
 
         return postService.getPostByUser(postId, userId)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
@@ -96,9 +94,8 @@ public class PostHandler extends BaseHandler {
     }
 
     public Mono<ServerResponse> getPost(ServerRequest request) {
-        Long postId = Long.parseLong(request.pathVariable("postId"));
         Mono<Post> postMono = postService
-                .getPostById(postId)
+                .getPostById(parsePostId(request))
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
                 .cache();
         Mono<List<Comment>> commentsMono = postMono.flatMapMany(commentService::getCommentsForPost).collectList();
@@ -107,35 +104,45 @@ public class PostHandler extends BaseHandler {
                 .flatMap(ServerResponse.ok()::bodyValue);
     }
 
+    private Long parsePostId(ServerRequest request) {
+        return Long.parseLong(request.pathVariable("postId"));
+    }
+
     @Data
     @Builder
     @JsonInclude
     public static class IndexPostResponse {
         private Long id;
         private String userId;
+        private String topic;
         private String content;
+        private String thumbnailUrl;
+        private LocalDateTime createdAt;
 
         public static IndexPostResponse from(Post post) {
             return builder()
                     .id(post.getId())
                     .userId(post.getUserId())
-                    .content(post.getContent())
+                    .topic(post.getTopic())
+                    .content(post.getSummarizedContent())
+                    .thumbnailUrl(post.getThumbnailUrl())
+                    .createdAt(post.getCreatedAt())
                     .build();
         }
     }
 
     @Data
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonInclude
     public static class CreatePostRequest {
+        private String topic;
         private String content;
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         private String imageUrl;
     }
 
     @Data
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class UpdatePostRequest {
-        private String content;
-        private String imageUrl;
+    @EqualsAndHashCode(callSuper = true)
+    public static class UpdatePostRequest extends CreatePostRequest {
     }
 
     @Data
@@ -144,20 +151,14 @@ public class PostHandler extends BaseHandler {
     public static class GetPostResponse {
         private Long id;
         private String userId;
+        private String topic;
         private String content;
         private List<CommentHandler.GetCommentResponse> comments;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
 
         public static GetPostResponse from(Post post) {
-            return builder()
-                    .id(post.getId())
-                    .userId(post.getUserId())
-                    .content(post.getContent())
-                    .comments(Collections.emptyList())
-                    .createdAt(post.getCreatedAt())
-                    .updatedAt(post.getUpdatedAt())
-                    .build();
+            return from(post, Collections.emptyList());
         }
 
         public static GetPostResponse from(Post post, List<Comment> comments) {
@@ -166,6 +167,7 @@ public class PostHandler extends BaseHandler {
             return builder()
                     .id(post.getId())
                     .userId(post.getUserId())
+                    .topic(post.getTopic())
                     .content(post.getContent())
                     .comments(commentResponses)
                     .createdAt(post.getCreatedAt())
