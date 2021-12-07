@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 @Builder
 public class CreatePostDto {
-    private String userId;
+    private Long userId;
     private String topic;
     private String content;
     private String imageUrl;

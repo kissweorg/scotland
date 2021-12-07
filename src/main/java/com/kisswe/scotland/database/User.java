@@ -1,6 +1,5 @@
 package com.kisswe.scotland.database;
 
-import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -9,20 +8,17 @@ import org.springframework.data.annotation.Version;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-@Builder
 @Data
-@Table("posts")
-public class Post {
-    private static final int SUMMARY_CHAR_LENGTH = 128;
+@Table("users")
+public class User {
     @Id
     private Long id;
-    private Long userId;
-    private String topic;
-    private String content;
-    private String imageUrl;
-    private String thumbnailUrl;
-    private Boolean resolved;
+    private String nickname;
+    private String name;
+    private String email;
+    private List<Role> roles;
     @CreatedDate
     private LocalDateTime createdAt;
     @LastModifiedDate
@@ -30,9 +26,7 @@ public class Post {
     @Version
     private Long version;
 
-    public String getSummarizedContent() {
-        if (content.length() < SUMMARY_CHAR_LENGTH)
-            return content;
-        return content.substring(0, SUMMARY_CHAR_LENGTH) + "...";
+    public enum Role {
+        COMMON, OWNER, ADMIN
     }
 }

@@ -12,8 +12,9 @@ import java.util.Optional;
 public abstract class BaseHandler {
     private final AuthHeaderConfig authHeaderConfig;
 
-    protected String parseUserIdFromRequest(ServerRequest request) {
+    protected Long parseUserIdFromRequest(ServerRequest request) {
         return Optional.ofNullable(request.headers().firstHeader(authHeaderConfig.getUserId()))
+                .map(Long::parseLong)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
     }
 }

@@ -2,7 +2,7 @@ package com.kisswe.scotland.handler;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.kisswe.scotland.config.AuthHeaderConfig;
-import com.kisswe.scotland.database.Comment;
+import com.kisswe.scotland.database.post.Comment;
 import com.kisswe.scotland.service.CommentService;
 import com.kisswe.scotland.service.domain.CreateCommentDto;
 import lombok.Builder;
@@ -28,7 +28,7 @@ public class CommentHandler extends BaseHandler {
 
     public Mono<ServerResponse> createComment(ServerRequest request) {
         Long postId = Long.parseLong(request.pathVariable("postId"));
-        String userId = parseUserIdFromRequest(request);
+        Long userId = parseUserIdFromRequest(request);
 
         return request
                 .bodyToMono(CreateCommentRequest.class)
@@ -56,7 +56,7 @@ public class CommentHandler extends BaseHandler {
     public static class GetCommentResponse {
         private Long id;
         private Long postId;
-        private String userId;
+        private Long userId;
         private String content;
         private String imageUrl;
         private LocalDateTime createdAt;

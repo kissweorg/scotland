@@ -28,7 +28,10 @@ dependencies {
 	implementation "org.springframework.boot:spring-boot-starter-data-r2dbc:${springBootVersion}"
 	implementation "org.springframework.boot:spring-boot-starter-webflux:${springBootVersion}"
 	implementation 'io.r2dbc:r2dbc-postgresql'
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
 	compileOnly 'org.projectlombok:lombok'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.2'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.2'
 	developmentOnly "org.springframework.boot:spring-boot-devtools:${springBootVersion}"
 	annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:${springBootVersion}"
 	annotationProcessor 'org.projectlombok:lombok'

@@ -6,7 +6,10 @@ import org.springframework.stereotype.Component;
 
 @Data
 @Component
-@ConfigurationProperties(prefix = "auth.header")
-public class AuthHeaderConfig {
-    private String userId;
+@ConfigurationProperties(prefix = "auth.signing-key")
+public class AuthSigningKeyConfig {
+    private String type;
+    private String filename;
+    private String password;
+    private String alias;
 }

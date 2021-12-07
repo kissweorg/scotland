@@ -1,4 +1,4 @@
-package com.kisswe.scotland.database;
+package com.kisswe.scotland.database.post;
 
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +17,7 @@ public class Comment {
     @Id
     private Long id;
     private Long postId;
-    private String userId;
+    private Long userId;
     private String content;
     private String imageUrl;
     @CreatedDate

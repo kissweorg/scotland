@@ -1,6 +1,6 @@
 package com.kisswe.scotland.service.domain;
 
-import com.kisswe.scotland.database.Comment;
+import com.kisswe.scotland.database.post.Comment;
 import lombok.Builder;
 import lombok.Data;
 
@@ -8,7 +8,7 @@ import lombok.Data;
 @Builder
 public class CreateCommentDto {
     private Long postId;
-    private String userId;
+    private Long userId;
     private String content;
     private String imageUrl;
 

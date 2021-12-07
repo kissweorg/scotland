@@ -6,6 +6,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface PostRepository extends R2dbcRepository<Post, Long> {
-    Flux<Post> findAllByUserId(String userId);
-    Mono<Post> findByIdAndUserId(Long id, String userId);
+    Flux<Post> findAllByUserId(Long userId);
+    Mono<Post> findByIdAndUserId(Long id, Long userId);
 }

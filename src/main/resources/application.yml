@@ -30,10 +30,17 @@ spring:
 auth:
   header:
     user-id: X-Kisswe-User-Id
+  claim:
+    issuer: kisswe-auth-service-dev
+    audience: gatekeeper-service-dev
+    duration: PT3H
+  signing-key:
+    type: JKS
+    filename: signature-keystore-dev.jks
+    password: Admin123Admin123
+    alias: kisswe-jwt-signature-dev-key
 
 logging:
   level:
-    org:
-      springframework:
-        data:
-          r2dbc: DEBUG
+    io.r2dbc.postgresql.QUERY: DEBUG # for queries
+    io.r2dbc.postgresql.PARAM: DEBUG # for parameters

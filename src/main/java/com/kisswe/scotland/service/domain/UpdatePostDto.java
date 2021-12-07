@@ -1,6 +1,5 @@
 package com.kisswe.scotland.service.domain;
 
-import com.kisswe.scotland.database.Post;
 import lombok.Builder;
 import lombok.Data;
 
@@ -8,7 +7,7 @@ import lombok.Data;
 @Builder
 public class UpdatePostDto {
     private Long postId;
-    private String userId;
+    private Long userId;
     private String content;
     private String imageUrl;
 }

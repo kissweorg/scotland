@@ -1,6 +1,6 @@
 package com.kisswe.scotland.service.impl;
 
-import com.kisswe.scotland.database.Comment;
+import com.kisswe.scotland.database.post.Comment;
 import com.kisswe.scotland.database.Post;
 import com.kisswe.scotland.repository.CommentRepository;
 import com.kisswe.scotland.service.CommentService;

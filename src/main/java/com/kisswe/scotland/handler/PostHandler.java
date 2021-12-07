@@ -2,7 +2,9 @@ package com.kisswe.scotland.handler;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.kisswe.scotland.config.AuthHeaderConfig;
-import com.kisswe.scotland.database.Comment;
+import com.kisswe.scotland.database.User;
+import com.kisswe.scotland.service.domain.PostWithUserAndCommentsDto;
+import com.kisswe.scotland.database.post.Comment;
 import com.kisswe.scotland.database.Post;
 import com.kisswe.scotland.service.CommentService;
 import com.kisswe.scotland.service.PostService;
@@ -48,7 +50,7 @@ public class PostHandler extends BaseHandler {
 
     public Mono<ServerResponse> getAllPosts(ServerRequest request) {
         Flux<IndexPostResponse> indexPostResponseFlux = postService
-                .getPosts()
+                .getPostsWithUserAndComments()
                 .map(IndexPostResponse::from);
         return ServerResponse.ok().body(indexPostResponseFlux, IndexPostResponse.class);
     }
@@ -85,7 +87,7 @@ public class PostHandler extends BaseHandler {
 
     public Mono<ServerResponse> deletePost(ServerRequest request) {
         Long postId = Long.parseLong(request.pathVariable("postId"));
-        String userId = parseUserIdFromRequest(request);
+        Long userId = parseUserIdFromRequest(request);
 
         return postService.getPostByUser(postId, userId)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
@@ -113,20 +115,24 @@ public class PostHandler extends BaseHandler {
     @JsonInclude
     public static class IndexPostResponse {
         private Long id;
-        private String userId;
+        private Long userId;
         private String topic;
         private String content;
-        private String thumbnailUrl;
+        private String imageUrl;
         private LocalDateTime createdAt;
+        private User user;
 
-        public static IndexPostResponse from(Post post) {
+        public static IndexPostResponse from(PostWithUserAndCommentsDto postWithUserAndCommentsDto) {
+            Post post = postWithUserAndCommentsDto.getPost();
+            User user = postWithUserAndCommentsDto.getUser();
             return builder()
                     .id(post.getId())
                     .userId(post.getUserId())
                     .topic(post.getTopic())
                     .content(post.getSummarizedContent())
-                    .thumbnailUrl(post.getThumbnailUrl())
+                    .imageUrl(post.getImageUrl())
                     .createdAt(post.getCreatedAt())
+                    .user(user)
                     .build();
         }
     }
@@ -150,7 +156,7 @@ public class PostHandler extends BaseHandler {
     @JsonInclude
     public static class GetPostResponse {
         private Long id;
-        private String userId;
+        private Long userId;
         private String topic;
         private String content;
         private List<CommentHandler.GetCommentResponse> comments;
