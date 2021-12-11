@@ -1,12 +1,10 @@
 package com.kisswe.scotland.service.impl;
 
 import com.kisswe.scotland.database.Post;
-import com.kisswe.scotland.database.User;
 import com.kisswe.scotland.repository.PostRepository;
-import com.kisswe.scotland.repository.UserRepository;
+import com.kisswe.scotland.repository.domain.PostWithUserAndComments;
 import com.kisswe.scotland.service.PostService;
 import com.kisswe.scotland.service.domain.CreatePostDto;
-import com.kisswe.scotland.service.domain.PostWithUserAndCommentsDto;
 import com.kisswe.scotland.service.domain.UpdatePostDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,54 +15,27 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Comparator;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 @Slf4j
 @RequiredArgsConstructor
 @Primary
 @Service
 public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
-    private final UserRepository userRepository;
 
     @Override
     public Flux<Post> getPosts() {
         return postRepository.findAll(Sort.by(Sort.Direction.DESC, "created_at"));
     }
 
+    // TODO: Write custom join SQL
     @Override
-    public Flux<PostWithUserAndCommentsDto> getPostsWithUserAndComments() {
-        Flux<Post> postFlux = postRepository.findAll().cache();
-        Mono<Map<Long, User>> users = postFlux.map(Post::getUserId)
-                .collect(Collectors.toSet())
-                .flatMapMany(userRepository::findAllByIdIn)
-                .cache()
-                .collectMap(User::getId);
-        // TODO: REVERSE
-        return postFlux.flatMap(post -> users
-                .map(user -> user.get(post.getUserId()))
-                .map(user -> PostWithUserAndCommentsDto.builder()
-                    .post(post)
-                    .user(user)
-                    .build()))
-                .sort(Comparator.comparing((PostWithUserAndCommentsDto postWithUserAndCommentsDto) ->
-                        postWithUserAndCommentsDto.getPost().getCreatedAt()).reversed());
+    public Flux<PostWithUserAndComments> getPostsWithUserAndComments() {
+        return postRepository.findAllWithUserAndComments();
     }
 
     @Override
-    public Flux<PostWithUserAndCommentsDto> getPostsForUser(Long userId) {
-        log.info("Finding posts for user = {}", userId);
-        Flux<Post> postFlux = postRepository.findAllByUserId(userId).cache();
-        Mono<User> userMono = userRepository.findById(userId).cache();
-        // TODO: REVERSE
-        return postFlux.flatMap(post -> userMono.map(user -> PostWithUserAndCommentsDto.builder()
-                .post(post)
-                .user(user)
-                .build()))
-                .sort(Comparator.comparing((PostWithUserAndCommentsDto postWithUserAndCommentsDto) ->
-                        postWithUserAndCommentsDto.getPost().getCreatedAt()).reversed());
+    public Flux<PostWithUserAndComments> getPostsForUser(Long userId) {
+        return postRepository.findAllByUserIdWithComments(userId);
     }
 
     @Override

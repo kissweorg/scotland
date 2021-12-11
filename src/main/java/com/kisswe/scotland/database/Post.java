@@ -1,5 +1,6 @@
 package com.kisswe.scotland.database;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 
 @Builder
 @Data
+@AllArgsConstructor
 @Table("posts")
 public class Post {
     private static final int SUMMARY_CHAR_LENGTH = 128;

@@ -45,6 +45,7 @@ public class JwtServiceImpl implements JwtService {
                 .setIssuedAt(Date.from(now))
                 .setNotBefore(Date.from(now))
                 .setExpiration(Date.from(now.plus(claimConfig.getDuration())))
+                .claim("nick", user.getNickname())
                 .claim("roles", user.getRoles())
                 .signWith(signingSk)
                 .compact());

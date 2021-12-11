@@ -3,6 +3,7 @@ package com.kisswe.scotland.handler;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.kisswe.scotland.config.AuthHeaderConfig;
 import com.kisswe.scotland.database.User;
+import com.kisswe.scotland.repository.domain.PostWithUserAndComments;
 import com.kisswe.scotland.service.domain.PostWithUserAndCommentsDto;
 import com.kisswe.scotland.database.post.Comment;
 import com.kisswe.scotland.database.Post;
@@ -121,19 +122,54 @@ public class PostHandler extends BaseHandler {
         private String imageUrl;
         private LocalDateTime createdAt;
         private User user;
+        private List<Comment> comments;
 
-        public static IndexPostResponse from(PostWithUserAndCommentsDto postWithUserAndCommentsDto) {
-            Post post = postWithUserAndCommentsDto.getPost();
-            User user = postWithUserAndCommentsDto.getUser();
+        public static IndexPostResponse from(PostWithUserAndComments postWithUserAndComments) {
+            List<Comment> comments = postWithUserAndComments.getComments()
+                    .stream()
+                    .map(Comment::from)
+                    .collect(Collectors.toList());
             return builder()
-                    .id(post.getId())
-                    .userId(post.getUserId())
-                    .topic(post.getTopic())
-                    .content(post.getSummarizedContent())
-                    .imageUrl(post.getImageUrl())
-                    .createdAt(post.getCreatedAt())
-                    .user(user)
+                    .id(postWithUserAndComments.getId())
+                    .topic(postWithUserAndComments.getTopic())
+                    .content(postWithUserAndComments.getSummarizedContent())
+                    .imageUrl(postWithUserAndComments.getImageUrl())
+                    .createdAt(postWithUserAndComments.getCreatedAt())
+                    .user(User.from(postWithUserAndComments.getUser()))
+                    .comments(comments)
                     .build();
+        }
+
+        @Data
+        @Builder
+        @JsonInclude
+        public static class User {
+            private Long id;
+            private String nickname;
+
+            public static User from(PostWithUserAndComments.User user) {
+                return builder()
+                        .id(user.getId())
+                        .nickname(user.getNickname())
+                        .build();
+            }
+        }
+
+        @Data
+        @Builder
+        @JsonInclude
+        public static class Comment {
+            private Long id;
+            private String content;
+            private LocalDateTime createdAt;
+
+            public static Comment from(PostWithUserAndComments.Comment comment) {
+                return builder()
+                        .id(comment.getId())
+                        .content(comment.getContent())
+                        .createdAt(comment.getCreatedAt())
+                        .build();
+            }
         }
     }
 
