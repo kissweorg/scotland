@@ -1,16 +1,13 @@
 package com.kisswe.scotland.handler;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.kisswe.scotland.config.AuthHeaderConfig;
 import com.kisswe.scotland.database.User;
 import com.kisswe.scotland.service.JwtService;
 import com.kisswe.scotland.service.KakaoAuthService;
 import com.kisswe.scotland.service.RefreshTokenService;
-import com.kisswe.scotland.service.UserService;
+import lombok.Builder;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpCookie;
@@ -22,6 +19,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -33,8 +31,8 @@ public class AuthHandler extends BaseHandler {
     private final RefreshTokenService refreshTokenService;
 
     @Autowired
-    public AuthHandler(AuthHeaderConfig authHeaderConfig, UserService userService, JwtService jwtService,
-                       KakaoAuthService kakaoAuthService, RefreshTokenService refreshTokenService) {
+    public AuthHandler(AuthHeaderConfig authHeaderConfig, JwtService jwtService, KakaoAuthService kakaoAuthService,
+                       RefreshTokenService refreshTokenService) {
         super(authHeaderConfig);
         this.jwtService = jwtService;
         this.kakaoAuthService = kakaoAuthService;
@@ -49,6 +47,7 @@ public class AuthHandler extends BaseHandler {
 
         return refreshTokenService
                 .getUserFromRefreshToken(refreshToken)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED))))
                 .flatMap(this::generateAuthResponseFromUserMono);
     }
 
@@ -64,7 +63,8 @@ public class AuthHandler extends BaseHandler {
     private Mono<ServerResponse> generateAuthResponseFromUserMono(User user) {
         return Mono.just(user)
                 .flatMap(jwtService::createAccessToken)
-                .map(AuthResponse::new)
+                .zipWith(Mono.just(user))
+                .map(t -> AuthResponse.from(t.getT2(), t.getT1()))
                 .flatMap(authResponse -> Mono.just(user)
                         .flatMap(refreshTokenService::generateRefreshToken)
                         .flatMap(refreshToken -> ServerResponse
@@ -95,15 +95,32 @@ public class AuthHandler extends BaseHandler {
 
     @JsonInclude
     @Data
-    @RequiredArgsConstructor
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @Builder
     public static class AuthResponse {
-        private final String accessToken;
+        private Long id;
+        private String nickname;
+        private String name;
+        // TODO: ENCRYPT THIS
+        private String email;
+        private LocalDateTime createdAt;
+        private LocalDateTime updatedAt;
+        private String accessToken;
+
+        public static AuthResponse from(User user, String accessToken) {
+            return AuthResponse.builder()
+                    .id(user.getId())
+                    .nickname(user.getNickname())
+                    .name(user.getName())
+                    .email(user.getEmail())
+                    .createdAt(user.getCreatedAt())
+                    .updatedAt(user.getUpdatedAt())
+                    .accessToken(accessToken)
+                    .build();
+        }
     }
 
     @JsonInclude
     @Data
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class KakaoAuthRequest {
         private String authCode;
     }
