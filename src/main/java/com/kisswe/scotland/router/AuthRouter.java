@@ -7,13 +7,14 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
-import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
-
 @Configuration
 public class AuthRouter {
     @Bean
     RouterFunction<ServerResponse> authRoutes(AuthHandler authHandler) {
-        return RouterFunctions
-                .route(POST("/v1/auth"), authHandler::authenticate);
+        return RouterFunctions.route()
+                .path("/v1/auth", builder -> builder
+                        .GET("/refresh", authHandler::refreshToken)
+                        .POST("/kakao", authHandler::authWithKakao))
+                .build();
     }
 }

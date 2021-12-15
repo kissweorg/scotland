@@ -9,4 +9,5 @@ import java.util.Set;
 
 public interface UserRepository extends R2dbcRepository<User, Long> {
     Flux<User> findAllByIdIn(Set<Long> ids);
+
 }

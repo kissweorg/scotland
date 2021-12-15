@@ -5,30 +5,22 @@ import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.annotation.Version;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.UUID;
 
-@Data
 @Builder
-@Table("users")
-public class User {
+@Data
+@Table("refresh_tokens")
+public class RefreshToken {
     @Id
     private Long id;
-    private String nickname;
-    private String name;
-    private String email;
-    private List<Role> roles;
+    private UUID token;
+    private Long userId;
+    private LocalDateTime expiredAt;
     @CreatedDate
     private LocalDateTime createdAt;
     @LastModifiedDate
     private LocalDateTime updatedAt;
-    @Version
-    private Long version;
-
-    public enum Role {
-        COMMON, OWNER, ADMIN
-    }
 }

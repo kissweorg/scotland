@@ -6,19 +6,13 @@ import com.kisswe.scotland.database.User;
 import com.kisswe.scotland.service.UserService;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.annotation.Version;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Component
 public class ProfileHandler extends BaseHandler {
