@@ -29,7 +29,7 @@ spring:
 
 auth:
   refresh-token:
-    duration: PT1H
+    duration: P7D
 #    key: s9DLs2WNsrl5hBhkKXtEY8cOkF9hZCzyfwuBSofNY7U=
   header:
     user-id: X-Kisswe-User-Id

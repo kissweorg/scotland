@@ -11,5 +11,7 @@ public interface RefreshTokenService {
 
     Mono<User> getUserFromRefreshToken(UUID refreshToken);
 
+    Mono<Void> removeRefreshToken(UUID refreshToken);
+
     Duration getDuration();
 }

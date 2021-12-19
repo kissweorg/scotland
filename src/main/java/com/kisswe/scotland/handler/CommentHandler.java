@@ -19,7 +19,6 @@ import java.time.LocalDateTime;
 public class CommentHandler extends BaseHandler {
     private final CommentService commentService;
 
-
     @Autowired
     public CommentHandler(AuthHeaderConfig authHeaderConfig, CommentService commentService) {
         super(authHeaderConfig);

@@ -20,6 +20,7 @@ public class PostRouter {
                 .andRoute(POST("/v1/posts"), postHandler::createPost)
                 .andRoute(GET("/v1/posts/{postId}"), postHandler::getPost)
                 .andRoute(PUT("/v1/posts/{postId}"), postHandler::updatePost)
+                .andRoute(POST("/v1/posts/{postId}/favorite"), postHandler::markPostFavorite)
                 .andRoute(DELETE("/v1/posts/{postId}"), postHandler::deletePost);
     }
 

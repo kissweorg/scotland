@@ -86,6 +86,14 @@ public class PostHandler extends BaseHandler {
                 .flatMap(ServerResponse.ok()::bodyValue);
     }
 
+    public Mono<ServerResponse> markPostFavorite(ServerRequest request) {
+        Long postId = parsePostId(request);
+        Long userId = parseUserIdFromRequest(request);
+        return postService
+                .markPostFavorite(postId, userId)
+                .flatMap(ServerResponse.ok()::bodyValue);
+    }
+
     public Mono<ServerResponse> deletePost(ServerRequest request) {
         Long postId = Long.parseLong(request.pathVariable("postId"));
         Long userId = parseUserIdFromRequest(request);

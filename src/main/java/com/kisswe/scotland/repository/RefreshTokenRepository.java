@@ -8,4 +8,5 @@ import java.util.UUID;
 
 public interface RefreshTokenRepository extends R2dbcRepository<RefreshToken, String> {
     Mono<RefreshToken> findByToken(UUID token);
+    Mono<Void> deleteByToken(UUID token);
 }

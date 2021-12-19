@@ -19,7 +19,9 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -44,7 +46,7 @@ public class AuthHandler extends BaseHandler {
                 .map(HttpCookie::getValue)
                 .map(UUID::fromString)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
-
+        log.info("Trying to refresh token = {}", refreshToken);
         return refreshTokenService
                 .getUserFromRefreshToken(refreshToken)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED))))
@@ -60,6 +62,7 @@ public class AuthHandler extends BaseHandler {
                 .flatMap(this::generateAuthResponseFromUserMono);
     }
 
+    // TODO: Also send OAuth Platform in response cookie
     private Mono<ServerResponse> generateAuthResponseFromUserMono(User user) {
         return Mono.just(user)
                 .flatMap(jwtService::createAccessToken)
@@ -76,6 +79,17 @@ public class AuthHandler extends BaseHandler {
                                         .maxAge(refreshTokenService.getDuration())
                                         .build())
                                 .bodyValue(authResponse)));
+    }
+
+    public Mono<ServerResponse> signOut(ServerRequest request) {
+        String maybeRefreshToken = Objects.requireNonNull(request.cookies().getFirst("rft")).getValue();
+        return refreshTokenService.removeRefreshToken(UUID.fromString(maybeRefreshToken))
+                .flatMap(ignore -> ServerResponse.ok().cookie(ResponseCookie.from("rft", "")
+                                .maxAge(Duration.ZERO)
+                                .path("/")
+                                .httpOnly(true)
+                                .build())
+                        .build());
     }
 
     // TODO: Need to investigate more on better oauth flow

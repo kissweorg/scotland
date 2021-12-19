@@ -14,7 +14,8 @@ public class AuthRouter {
         return RouterFunctions.route()
                 .path("/v1/auth", builder -> builder
                         .GET("/refresh", authHandler::refreshToken)
-                        .POST("/kakao", authHandler::authWithKakao))
+                        .POST("/kakao", authHandler::authWithKakao)
+                        .POST("/sign-out", authHandler::signOut))
                 .build();
     }
 }

@@ -30,9 +30,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .sql(query)
                 .fetch()
                 .all()
-//                .bufferUntilChanged()
                 .reduce(new HashMap<Long, PostWithUserAndComments>(), (acc, curr) -> {
-                    log.info("row = {}", curr);
                     Long postId = nonNullConvertTo(curr.get("p_id"), Long.class);
                     var commentCreatedAt = nonNullConvertTo(curr.get("c_created_at"), OffsetDateTime.class);
                     PostWithUserAndComments.Comment comment = PostWithUserAndComments.Comment.builder()
@@ -85,7 +83,6 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .fetch()
                 .all()
                 .reduce(new HashMap<Long, PostWithUserAndComments>(), (acc, curr) -> {
-                    log.info("row = {}", curr);
                     Long postId = nonNullConvertTo(curr.get("p_id"), Long.class);
                     var commentCreatedAt = nonNullConvertTo(curr.get("c_created_at"), OffsetDateTime.class);
                     PostWithUserAndComments.Comment comment = PostWithUserAndComments.Comment.builder()

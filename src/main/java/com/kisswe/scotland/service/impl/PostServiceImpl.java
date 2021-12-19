@@ -1,8 +1,10 @@
 package com.kisswe.scotland.service.impl;
 
 import com.kisswe.scotland.database.Post;
+import com.kisswe.scotland.database.post.Favorite;
 import com.kisswe.scotland.repository.PostRepository;
 import com.kisswe.scotland.repository.domain.PostWithUserAndComments;
+import com.kisswe.scotland.repository.post.FavoriteRepository;
 import com.kisswe.scotland.service.PostService;
 import com.kisswe.scotland.service.domain.CreatePostDto;
 import com.kisswe.scotland.service.domain.UpdatePostDto;
@@ -21,6 +23,7 @@ import reactor.core.publisher.Mono;
 @Service
 public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
+    private final FavoriteRepository favoriteRepository;
 
     @Override
     public Flux<Post> getPosts() {
@@ -61,6 +64,14 @@ public class PostServiceImpl implements PostService {
                     post.setImageUrl(updatePostDto.getImageUrl());
                 })
                 .flatMap(postRepository::save);
+    }
+
+    @Override
+    public Mono<Favorite> markPostFavorite(Long id, Long userId) {
+        return favoriteRepository.save(Favorite.builder()
+                .postId(id)
+                .userId(userId)
+                .build());
     }
 
     @Transactional
